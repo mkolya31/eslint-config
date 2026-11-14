@@ -13,7 +13,7 @@ npx @kolyach/eslint-config init
 ```
 
 Команда устанавливает в `devDependencies` сам пакет, ESLint, Prettier и TypeScript 5,
-создаёт `eslint.config.mjs` и `.prettierrc.json`, добавляет скрипты:
+создаёт `eslint.config.mjs` и `.prettierrc.json`, добавляет скрипты:npm
 
 ```sh
 npm run lint
