@@ -71,8 +71,8 @@ eslint-config-prettier, затем личные правила. Сохраняю
 `legacy/**`, `mockups/**`, `node_modules/**`, `output/**`, browser/node globals,
 ограничения сложности и размера файлов. React определяется автоматически.
 Настройки Prettier: `singleQuote: true`, `jsxSingleQuote: false`.
-TypeScript 5 нужен для работы SonarJS 3.0.7, даже при проверке JavaScript.
-Версия ограничена через peer dependency: с TypeScript 7 этот SonarJS не запускается.
+TypeScript 5 нужен для работы SonarJS 4.2.2, даже при проверке JavaScript.
+Версия ограничена через peer dependency; SonarJS 4.2.2 поддерживает TypeScript >=5 <6.1.0.
 Обновление зависимости `@kolyach/eslint-config` обновляет общие настройки.
 
 ## Разработка и проверка до публикации
@@ -107,6 +107,22 @@ npm publish --access public
 Нужны права публикации в scope `@kolyach`. Перед публикацией автоматически
 выполняются lint, проверка форматирования и тесты. Пакет не содержит исходников
 или файлов проекта `pod-kirpich`, кроме перенесённых настроек.
+
+## Проверка версии перед релизом
+
+Workflow `.github/workflows/version-check.yml` проверяет PR в `production`:
+версия в `package.json` должна отличаться от версии в текущей ветке `production`.
+При совпадении проверка `Version differs from production` завершается ошибкой.
+Перед слиянием обновите версию и lockfile, например:
+
+```sh
+npm version patch --no-git-tag-version
+```
+
+Чтобы ошибка блокировала слияние, добавьте `Version differs from production`
+в обязательные status checks правила защиты ветки `production` на GitHub.
+Проверка сравнивает версии на различие; порядок версий и наличие версии в npm
+она не проверяет. Прямой push в `production` этот PR workflow не запускает.
 
 Справка: [ESLint flat config](https://eslint.org/docs/latest/use/configure/configuration-files),
 [Prettier shared config](https://prettier.io/docs/sharing-configurations),

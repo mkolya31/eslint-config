@@ -115,11 +115,14 @@ test('missing or invalid package.json is rejected', async (t) => {
   await assert.rejects(init(cwd), /valid package.json/u);
 });
 
-test('CLI exposes help/version and rejects unknown arguments', () => {
+test('CLI exposes help/version and rejects unknown arguments', async () => {
+  const pkg = JSON.parse(
+    await readFile(new URL('../package.json', import.meta.url), 'utf8'),
+  );
   const cli = fileURLToPath(new URL('../bin/cli.js', import.meta.url));
   const run = (...args) => spawnSync(process.execPath, [cli, ...args]);
   assert.match(run('--help').stdout.toString(), /Usage:/u);
-  assert.equal(run('--version').stdout.toString().trim(), '0.1.0');
+  assert.equal(run('--version').stdout.toString().trim(), pkg.version);
   assert.equal(run('init', '--unknown').status, 1);
 });
 

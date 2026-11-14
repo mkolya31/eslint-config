@@ -1,0 +1,35 @@
+name: Publish to npm
+
+on:
+  push:
+    branches: [production]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+      - name: Install npm with Trusted Publishing support
+        run: npm install --global npm@11.21.2
+      - run: npm ci
+      # prepublishOnly runs lint, format:check and tests before uploading.
+      - name: Check and publish package
+        run: npm publish --access public

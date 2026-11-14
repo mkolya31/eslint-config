@@ -1,0 +1,42 @@
+name: Check release version
+
+on:
+  pull_request:
+    branches: [production]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  version-check:
+    name: Version differs from production
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Compare package versions
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require('node:fs');
+          const { execFileSync } = require('node:child_process');
+          const incoming = JSON.parse(readFileSync('package.json', 'utf8')).version;
+          const production = JSON.parse(execFileSync(
+            'git', ['show', 'origin/production:package.json'], { encoding: 'utf8' }
+          )).version;
+          if (typeof incoming !== 'string' || typeof production !== 'string') {
+            throw new Error('Both package.json files must contain a version string.');
+          }
+          if (incoming === production) {
+            console.error(`::error::Version ${incoming} is already in production. Update package.json and package-lock.json before merging.`);
+            process.exit(1);
+          }
+          console.log(`Version changed: ${production} -> ${incoming}`);
+          NODE
